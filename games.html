@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stimlog 2.0 - Spiele</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .stars-display {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .game-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .game-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .game-cost {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-buttons button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-buttons button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        #gameCanvas {
+            border: 2px solid #667eea;
+            background: #000;
+            display: block;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+
+        .game-info {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .game-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .insufficient-stars {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            color: #856404;
+            margin: 20px 0;
+        }
+
+        .game-view {
+            display: none;
+        }
+
+        .game-view.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Spiele</h1>
+            <div class="stars-display">⭐ <span id="stars">0</span></div>
+        </div>
+
+        <div class="content">
+            <div class="nav-buttons">
+                <button class="active" onclick="showGames()">Spiele</button>
+                <button onclick="goToTracker()">Tracker</button>
+            </div>
+
+            <div id="games-list" class="game-view active">
+                <div class="games-grid">
+                    <div class="game-card" onclick="startGame('flappybird')">
+                        <div class="game-icon">🐦</div>
+                        <div class="game-name">Flappy Bird</div>
+                        <div class="game-cost">⭐ 2 Stars</div>
+                    </div>
+                    <div class="game-card" onclick="startGame('snake')">
+                        <div class="game-icon">🐍</div>
+                        <div class="game-name">Snake</div>
+                        <div class="game-cost">⭐ 2 Stars</div>
+                    </div>
+                    <div class="game-card" onclick="startGame('memory')">
+                        <div class="game-icon">🧠</div>
+                        <div class="game-name">Memory</div>
+                        <div class="game-cost">⭐ 1 Star</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-play" class="game-view">
+                <button class="btn btn-secondary" onclick="backToGames()" style="width: 100%;">← Zurück</button>
+                <div class="game-info">
+                    Score: <span id="score">0</span>
+                </div>
+                <canvas id="gameCanvas" width="400" height="300"></canvas>
+                <div class="game-buttons">
+                    <button class="btn btn-primary" onclick="pauseResumeGame()">Pause</button>
+                    <button class="btn btn-secondary" onclick="backToGames()">Beenden</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGame = null;
+        let gameRunning = false;
+        let gamePaused = false;
+        let score = 0;
+
+        function loadStars() {
+            const today = new Date().toDateString();
+            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": []}');
+            
+            if (data.date !== today) {
+                return 0;
+            }
+            
+            const total = data.entries.reduce((sum, entry) => sum + entry.amount, 0);
+            const DAILY_LIMIT = 400;
+            
+            if (total > DAILY_LIMIT) {
+                return Math.max(0, Math.floor((DAILY_LIMIT / total) * 5));
+            }
+            return Math.floor((total / DAILY_LIMIT) * 5);
+        }
+
+        function deductStars(amount) {
+            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": []}');
+            localStorage.setItem('stimlog_data', JSON.stringify(data));
+        }
+
+        function updateStarsDisplay() {
+            document.getElementById('stars').textContent = loadStars();
+        }
+
+        function startGame(game) {
+            const cost = game === 'memory' ? 1 : 2;
+            if (loadStars() < cost) {
+                alert(`Nicht genug Stars! Benötigt: ${cost}, Vorhanden: ${loadStars()}`);
+                return;
+            }
+
+            deductStars(cost);
+            currentGame = game;
+            gameRunning = true;
+            gamePaused = false;
+            score = 0;
+
+            document.getElementById('games-list').classList.remove('active');
+            document.getElementById('game-play').classList.add('active');
+            document.getElementById('score').textContent = '0';
+
+            if (game === 'flappybird') initFlappyBird();
+            else if (game === 'snake') initSnake();
+            else if (game === 'memory') initMemory();
+        }
+
+        function backToGames() {
+            gameRunning = false;
+            gamePaused = false;
+            document.getElementById('game-play').classList.remove('active');
+            document.getElementById('games-list').classList.add('active');
+            updateStarsDisplay();
+        }
+
+        function showGames() {}
+        function goToTracker() {
+            window.location.href = 'index.html';
+        }
+
+        function pauseResumeGame() {
+            gamePaused = !gamePaused;
+        }
+
+        // FLAPPY BIRD
+        function initFlappyBird() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let bird = { x: 50, y: canvas.height / 2, width: 20, height: 20, velocity: 0 };
+            let pipes = [];
+            let gapSize = 80;
+            let pipeWidth = 50;
+            let pipeSpeed = 3;
+            let pipeGap = 100;
+            let distance = 0;
+
+            function drawBird() {
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+            }
+
+            function drawPipes() {
+                ctx.fillStyle = '#00AA00';
+                pipes.forEach(pipe => {
+                    ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+                    ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+                });
+            }
+
+            function update() {
+                if (gamePaused) return;
+
+                bird.velocity += 0.4;
+                bird.y += bird.velocity;
+
+                distance++;
+                if (distance % pipeGap === 0) {
+                    let topHeight = Math.random() * (canvas.height - gapSize - 40) + 20;
+                    pipes.push({
+                        x: canvas.width,
+                        top: topHeight,
+                        bottom: topHeight + gapSize
+                    });
+                }
+
+                pipes.forEach(pipe => pipe.x -= pipeSpeed);
+                pipes = pipes.filter(pipe => pipe.x > -pipeWidth);
+
+                pipes.forEach(pipe => {
+                    if (bird.x + bird.width > pipe.x && bird.x < pipe.x + pipeWidth) {
+                        if (bird.y < pipe.top || bird.y + bird.height > pipe.bottom) {
+                            gameRunning = false;
+                        }
+                    }
+                    if (pipe.x === bird.x) score++;
+                });
+
+                if (bird.y > canvas.height || bird.y < 0) gameRunning = false;
+            }
+
+            function draw() {
+                ctx.fillStyle = '#87CEEB';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawBird();
+                drawPipes();
+                document.getElementById('score').textContent = score;
+            }
+
+            function loop() {
+                update();
+                draw();
+                if (gameRunning) requestAnimationFrame(loop);
+                else backToGames();
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ') bird.velocity = -6;
+            });
+            canvas.addEventListener('click', () => bird.velocity = -6);
+
+            loop();
+        }
+
+        // SNAKE
+        function initSnake() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const gridSize = 20;
+            
+            let snake = [{x: canvas.width / 2, y: canvas.height / 2}];
+            let food = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
+            let direction = {x: 1, y: 0};
+            let nextDirection = {x: 1, y: 0};
+
+            function draw() {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00FF00';
+                snake.forEach(segment => ctx.fillRect(segment.x, segment.y, gridSize, gridSize));
+                
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(food.x, food.y, gridSize, gridSize);
+            }
+
+            function update() {
+                if (gamePaused) return;
+
+                direction = nextDirection;
+                let head = {x: snake[0].x + direction.x * gridSize, y: snake[0].y + direction.y * gridSize};
+
+                if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                    gameRunning = false;
+                }
+
+                for (let segment of snake) {
+                    if (head.x === segment.x && head.y === segment.y) gameRunning = false;
+                }
+
+                snake.unshift(head);
+
+                if (head.x === Math.floor(food.x / gridSize) * gridSize && head.y === Math.floor(food.y / gridSize) * gridSize) {
+                    score++;
+                    food = {x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize, y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize};
+                } else {
+                    snake.pop();
+                }
+            }
+
+            function loop() {
+                update();
+                draw();
+                document.getElementById('score').textContent = score;
+                if (gameRunning) setTimeout(loop, 100);
+                else backToGames();
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' && direction.y === 0) nextDirection = {x: 0, y: -1};
+                if (e.key === 'ArrowDown' && direction.y === 0) nextDirection = {x: 0, y: 1};
+                if (e.key === 'ArrowLeft' && direction.x === 0) nextDirection = {x: -1, y: 0};
+                if (e.key === 'ArrowRight' && direction.x === 0) nextDirection = {x: 1, y: 0};
+            });
+
+            loop();
+        }
+
+        // MEMORY
+        function initMemory() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const cards = [];
+            const cardSize = 60;
+            const padding = 10;
+            let flipped = [];
+            let matched = 0;
+
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 3; j++) {
+                    cards.push({x: i * (cardSize + padding) + 20, y: j * (cardSize + padding) + 20, value: Math.floor((i + j * 4) / 2), flipped: false});
+                }
+            }
+
+            function draw() {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                cards.forEach((card, idx) => {
+                    ctx.fillStyle = card.flipped ? '#FFD700' : '#666';
+                    ctx.fillRect(card.x, card.y, cardSize, cardSize);
+                    ctx.strokeStyle = '#FFF';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(card.x, card.y, cardSize, cardSize);
+                    
+                    if (card.flipped) {
+                        ctx.fillStyle = '#000';
+                        ctx.font = '20px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(card.value, card.x + cardSize / 2, card.y + cardSize / 2 + 7);
+                    }
+                });
+            }
+
+            canvas.addEventListener('click', (e) => {
+                if (!gameRunning || gamePaused || flipped.length === 2) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                for (let idx = 0; idx < cards.length; idx++) {
+                    const card = cards[idx];
+                    if (x > card.x && x < card.x + cardSize && y > card.y && y < card.y + cardSize) {
+                        if (!card.flipped && !flipped.includes(idx)) {
+                            card.flipped = true;
+                            flipped.push(idx);
+
+                            if (flipped.length === 2) {
+                                if (cards[flipped[0]].value === cards[flipped[1]].value) {
+                                    matched++;
+                                    score++;
+                                    flipped = [];
+                                    if (matched === 6) gameRunning = false;
+                                } else {
+                                    setTimeout(() => {
+                                        cards[flipped[0]].flipped = false;
+                                        cards[flipped[1]].flipped = false;
+                                        flipped = [];
+                                    }, 800);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            });
+
+            function loop() {
+                draw();
+                document.getElementById('score').textContent = score;
+                if (gameRunning) requestAnimationFrame(loop);
+                else backToGames();
+            }
+
+            loop();
+        }
+
+        updateStarsDisplay();
+    </script>
+</body>
+</html>

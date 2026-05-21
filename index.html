@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stimlog 2.0 - Koffein Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .stars-display {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .today-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        .limit-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .quick-add {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .custom-input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .custom-input-section input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .custom-input-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .custom-input-section .btn {
+            flex: 0.5;
+        }
+
+        .history {
+            margin-top: 30px;
+        }
+
+        .history h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .entry-info {
+            flex: 1;
+        }
+
+        .entry-amount {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .entry-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .reset-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .reset-btn:hover {
+            background: #ff5252;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-buttons button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-buttons button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>☕ Stimlog 2.0</h1>
+            <div class="stars-display">⭐ <span id="stars">0</span></div>
+            <div class="today-info">
+                <div>Heute: <strong id="today-intake">0</strong>mg / 400mg</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="nav-buttons">
+                <button class="active" onclick="showTracker()">Tracker</button>
+                <button onclick="goToGames()">Spiele</button>
+            </div>
+
+            <div id="tracker-page">
+                <div class="progress-section">
+                    <div class="limit-text">
+                        <span>Tagesfortschritt</span>
+                        <span id="percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="warning" style="display: none;"></div>
+
+                <div class="quick-add">
+                    <button class="btn btn-primary" onclick="addCaffeine(95)">☕ Kaffee<br>(95mg)</button>
+                    <button class="btn btn-primary" onclick="addCaffeine(47)">🍵 Tee<br>(47mg)</button>
+                    <button class="btn btn-primary" onclick="addCaffeine(34)">🥤 Cola<br>(34mg)</button>
+                    <button class="btn btn-primary" onclick="addCaffeine(80)">⚡ Energy<br>(80mg)</button>
+                </div>
+
+                <div class="custom-input-section">
+                    <input type="number" id="customAmount" placeholder="mg eingeben..." min="0">
+                    <button class="btn btn-primary" onclick="addCustom()">+</button>
+                </div>
+
+                <div class="history">
+                    <h3>📋 Heute's Einträge</h3>
+                    <div id="entries"></div>
+                    <button class="reset-btn" onclick="resetDay()">Tag zurücksetzen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DAILY_LIMIT = 400;
+        const STAR_MULTIPLIER = 1;
+
+        function loadData() {
+            const today = new Date().toDateString();
+            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": []}');
+            
+            if (data.date !== today) {
+                data.date = today;
+                data.entries = [];
+            }
+            
+            return data;
+        }
+
+        function saveData(data) {
+            localStorage.setItem('stimlog_data', JSON.stringify(data));
+            updateUI();
+        }
+
+        function addCaffeine(amount) {
+            const data = loadData();
+            data.entries.push({
+                amount: amount,
+                time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+            });
+            saveData(data);
+        }
+
+        function addCustom() {
+            const input = document.getElementById('customAmount');
+            const amount = parseInt(input.value);
+            if (amount > 0) {
+                addCaffeine(amount);
+                input.value = '';
+            }
+        }
+
+        function removeEntry(index) {
+            const data = loadData();
+            data.entries.splice(index, 1);
+            saveData(data);
+        }
+
+        function resetDay() {
+            if (confirm('Tag wirklich zurücksetzen?')) {
+                const data = loadData();
+                data.entries = [];
+                saveData(data);
+            }
+        }
+
+        function getTotalIntake() {
+            const data = loadData();
+            return data.entries.reduce((sum, entry) => sum + entry.amount, 0);
+        }
+
+        function getStars() {
+            const total = getTotalIntake();
+            if (total > DAILY_LIMIT) {
+                return Math.max(0, Math.floor((DAILY_LIMIT / total) * 5));
+            }
+            return Math.floor((total / DAILY_LIMIT) * 5) * STAR_MULTIPLIER;
+        }
+
+        function updateUI() {
+            const total = getTotalIntake();
+            const percentage = Math.min(100, (total / DAILY_LIMIT) * 100);
+            const stars = getStars();
+
+            document.getElementById('today-intake').textContent = total;
+            document.getElementById('percentage').textContent = Math.round(percentage) + '%';
+            document.getElementById('progress').style.width = percentage + '%';
+            document.getElementById('stars').textContent = stars;
+
+            // Warning anzeigen
+            const warningDiv = document.getElementById('warning');
+            if (total > DAILY_LIMIT) {
+                warningDiv.innerHTML = `<div class="warning">⚠️ Limit überschritten! +${total - DAILY_LIMIT}mg über dem Limit!</div>`;
+                warningDiv.style.display = 'block';
+            } else if (total > DAILY_LIMIT * 0.8) {
+                warningDiv.innerHTML = `<div class="warning">⚠️ Vorsicht! Noch ${DAILY_LIMIT - total}mg verfügbar.</div>`;
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+
+            // Einträge rendern
+            const data = loadData();
+            const entriesDiv = document.getElementById('entries');
+            if (data.entries.length === 0) {
+                entriesDiv.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">Noch keine Einträge heute</div>';
+            } else {
+                entriesDiv.innerHTML = data.entries.map((entry, idx) => `
+                    <div class="entry">
+                        <div class="entry-info">
+                            <div class="entry-amount">${entry.amount}mg</div>
+                            <div class="entry-time">${entry.time}</div>
+                        </div>
+                        <button class="btn btn-danger" onclick="removeEntry(${idx})">✕</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function showTracker() {
+            document.querySelectorAll('.nav-buttons button').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === 0);
+            });
+        }
+
+        function goToGames() {
+            window.location.href = 'games.html';
+        }
+
+        // Initial load
+        updateUI();
+        setInterval(updateUI, 1000);
+    </script>
+</body>
+</html>
