@@ -19,9 +19,12 @@ Eine moderne, kompakte Neuversion des Stimlog Koffein-Trackers mit integriertem 
 
 ## ⭐ Star-System
 
-**Verdienen:**
-- Für jeden 100mg Koffein bis zur Limite: 1 Star
-- Mit 400mg exakt: 5 Stars
+**Verdienen (je weniger Koffein, desto mehr Sterne):**
+- **0 mg** Koffein: 5 Stars ⭐⭐⭐⭐⭐
+- **~100 mg** Koffein: 4 Stars ⭐⭐⭐⭐
+- **~200 mg** Koffein: 3 Stars ⭐⭐⭐
+- **~300 mg** Koffein: 2 Stars ⭐⭐
+- **400 mg und mehr**: 1 Star ⭐
 
 **Ausgeben:**
 - Flappy Bird / Snake: 2 Stars pro Spiel
