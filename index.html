@@ -360,10 +360,14 @@
 
         function getStars() {
             const total = getTotalIntake();
-            if (total > DAILY_LIMIT) {
-                return Math.max(0, Math.floor((DAILY_LIMIT / total) * 5));
+            // Neue Logik: Je weniger Koffein, desto mehr Sterne
+            // 0mg = 5 Sterne, 400mg = 1 Stern
+            if (total >= DAILY_LIMIT) {
+                return 1; // Bei 400mg oder mehr: 1 Stern
             }
-            return Math.floor((total / DAILY_LIMIT) * 5) * STAR_MULTIPLIER;
+            // Berechnung für 0-399mg: 5 Sterne runter zu 1 Stern
+            const starsAwarded = 5 - Math.floor((total / DAILY_LIMIT) * 4);
+            return Math.max(1, starsAwarded);
         }
 
         function updateUI() {
