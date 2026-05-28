@@ -163,10 +163,36 @@
             font-weight: 600;
         }
 
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            color: #667eea;
+        }
+
         .game-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -176,6 +202,18 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
         }
 
         .btn-primary {
@@ -214,6 +252,22 @@
         .game-view.active {
             display: block;
         }
+
+        .start-screen {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .start-screen.active {
+            display: block;
+        }
+
+        .start-screen h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
@@ -237,17 +291,17 @@
                 </div>
 
                 <div class="games-grid">
-                    <div class="game-card" onclick="startGame('flappybird')">
+                    <div class="game-card" onclick="showStartScreen('flappybird')">
                         <div class="game-icon">🐦</div>
                         <div class="game-name">Flappy Bird</div>
                         <div class="game-cost">⭐ 2 Stars</div>
                     </div>
-                    <div class="game-card" onclick="startGame('snake')">
+                    <div class="game-card" onclick="showStartScreen('snake')">
                         <div class="game-icon">🐍</div>
                         <div class="game-name">Snake</div>
                         <div class="game-cost">⭐ 2 Stars</div>
                     </div>
-                    <div class="game-card" onclick="startGame('memory')">
+                    <div class="game-card" onclick="showStartScreen('memory')">
                         <div class="game-icon">🧠</div>
                         <div class="game-name">Memory</div>
                         <div class="game-cost">⭐ 1 Star</div>
@@ -255,15 +309,34 @@
                 </div>
             </div>
 
+            <div id="start-screen" class="start-screen">
+                <button class="btn btn-secondary" onclick="backToGames()" style="width: 100%; margin-bottom: 20px;">← Zurück</button>
+                <h2 id="start-game-title">Spiel</h2>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Personal Best</div>
+                        <div class="stat-value" id="pb-display">0</div>
+                    </div>
+                </div>
+                <button class="btn btn-start" onclick="startGame()" style="width: 100%; margin-top: 20px;">▶️ SPIEL STARTEN</button>
+            </div>
+
             <div id="game-play" class="game-view">
                 <button class="btn btn-secondary" onclick="backToGames()" style="width: 100%;">← Zurück</button>
-                <div class="game-info">
-                    Score: <span id="score">0</span>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Personal Best</div>
+                        <div class="stat-value" id="pb-ingame">0</div>
+                    </div>
                 </div>
                 <canvas id="gameCanvas" width="400" height="300"></canvas>
                 <div class="game-buttons">
-                    <button class="btn btn-primary" onclick="pauseResumeGame()">Pause</button>
-                    <button class="btn btn-secondary" onclick="backToGames()">Beenden</button>
+                    <button class="btn btn-primary" onclick="pauseResumeGame()">⏸️ Pause</button>
+                    <button class="btn btn-secondary" onclick="backToGames()">🛑 Beenden</button>
                 </div>
             </div>
         </div>
@@ -274,15 +347,17 @@
         let gameRunning = false;
         let gamePaused = false;
         let score = 0;
+        let gameStarted = false;
 
         function loadData() {
             const today = new Date().toDateString();
-            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": [], "manual_stars": 0}');
+            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": [], "manual_stars": 0, "pb": {}}');
             
             if (data.date !== today) {
                 data.date = today;
                 data.entries = [];
                 data.manual_stars = 0;
+                data.pb = {};
             }
             
             return data;
@@ -290,6 +365,22 @@
 
         function saveData(data) {
             localStorage.setItem('stimlog_data', JSON.stringify(data));
+        }
+
+        function getPB(game) {
+            const data = loadData();
+            return data.pb[game] || 0;
+        }
+
+        function savePB(game, score) {
+            const data = loadData();
+            if (!data.pb) data.pb = {};
+            if (score > (data.pb[game] || 0)) {
+                data.pb[game] = score;
+                saveData(data);
+                return true; // Neuer Record!
+            }
+            return false;
         }
 
         function loadStars() {
@@ -311,7 +402,6 @@
                 starsAwarded = Math.max(1, starsAwarded);
             }
             
-            // Manuelle Sterne hinzufügen
             return starsAwarded + (data.manual_stars || 0);
         }
 
@@ -340,32 +430,56 @@
             }
         }
 
-        function startGame(game) {
+        function showStartScreen(game) {
             const cost = game === 'memory' ? 1 : 2;
             if (loadStars() < cost) {
                 alert(`Nicht genug Stars! Benötigt: ${cost}, Vorhanden: ${loadStars()}`);
                 return;
             }
 
-            deductStars(cost);
             currentGame = game;
+            const gameNames = {
+                'flappybird': '🐦 Flappy Bird',
+                'snake': '🐍 Snake',
+                'memory': '🧠 Memory'
+            };
+
+            document.getElementById('start-game-title').textContent = gameNames[game] || 'Spiel';
+            document.getElementById('pb-display').textContent = getPB(game);
+            
+            document.getElementById('games-list').classList.remove('active');
+            document.getElementById('start-screen').classList.add('active');
+        }
+
+        function startGame() {
+            const cost = currentGame === 'memory' ? 1 : 2;
+            if (loadStars() < cost) {
+                alert(`Nicht genug Stars! Benötigt: ${cost}, Vorhanden: ${loadStars()}`);
+                return;
+            }
+
+            deductStars(cost);
             gameRunning = true;
             gamePaused = false;
+            gameStarted = true;
             score = 0;
 
-            document.getElementById('games-list').classList.remove('active');
+            document.getElementById('pb-ingame').textContent = getPB(currentGame);
+            document.getElementById('start-screen').classList.remove('active');
             document.getElementById('game-play').classList.add('active');
             document.getElementById('score').textContent = '0';
 
-            if (game === 'flappybird') initFlappyBird();
-            else if (game === 'snake') initSnake();
-            else if (game === 'memory') initMemory();
+            if (currentGame === 'flappybird') initFlappyBird();
+            else if (currentGame === 'snake') initSnake();
+            else if (currentGame === 'memory') initMemory();
         }
 
         function backToGames() {
             gameRunning = false;
             gamePaused = false;
+            gameStarted = false;
             document.getElementById('game-play').classList.remove('active');
+            document.getElementById('start-screen').classList.remove('active');
             document.getElementById('games-list').classList.add('active');
             updateStarsDisplay();
         }
@@ -386,7 +500,7 @@
             
             let bird = { x: 50, y: canvas.height / 2, width: 20, height: 20, velocity: 0 };
             let pipes = [];
-            let gapSize = 80;
+            let gapSize = 120; // Vergrößert von 80 zu 120
             let pipeWidth = 50;
             let pipeSpeed = 3;
             let pipeGap = 100;
@@ -448,7 +562,7 @@
                 update();
                 draw();
                 if (gameRunning) requestAnimationFrame(loop);
-                else backToGames();
+                else endGame();
             }
 
             document.addEventListener('keydown', (e) => {
@@ -510,7 +624,7 @@
                 draw();
                 document.getElementById('score').textContent = score;
                 if (gameRunning) setTimeout(loop, 100);
-                else backToGames();
+                else endGame();
             }
 
             document.addEventListener('keydown', (e) => {
@@ -598,10 +712,25 @@
                 draw();
                 document.getElementById('score').textContent = score;
                 if (gameRunning) requestAnimationFrame(loop);
-                else backToGames();
+                else endGame();
             }
 
             loop();
+        }
+
+        function endGame() {
+            const isNewRecord = savePB(currentGame, score);
+            if (isNewRecord) {
+                alert(`🎉 Neuer Record! Score: ${score}`);
+            }
+            setTimeout(() => {
+                gameRunning = false;
+                gamePaused = false;
+                document.getElementById('game-play').classList.remove('active');
+                document.getElementById('start-screen').classList.add('active');
+                document.getElementById('pb-display').textContent = getPB(currentGame);
+                updateStarsDisplay();
+            }, 500);
         }
 
         updateStarsDisplay();
