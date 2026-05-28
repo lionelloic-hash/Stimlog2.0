@@ -48,6 +48,40 @@
             padding: 30px 20px;
         }
 
+        .star-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .star-btn {
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+            border: 2px solid #ffb700;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 100px;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .star-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(135deg, #ffed4e 0%, #fff700 100%);
+        }
+
+        .star-btn:active {
+            transform: translateY(0);
+        }
+
         .games-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -180,31 +214,6 @@
         .game-view.active {
             display: block;
         }
-
-        .star-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .star-btn {
-            padding: 10px 15px;
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .star-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-        }
     </style>
 </head>
 <body>
@@ -222,9 +231,9 @@
 
             <div id="games-list" class="game-view active">
                 <div class="star-buttons">
-                    <button class="star-btn" onclick="addManualStars(1)">+1 ⭐</button>
-                    <button class="star-btn" onclick="addManualStars(5)">+5 ⭐</button>
-                    <button class="star-btn" onclick="resetStars()">Sterne zurücksetzen</button>
+                    <button class="star-btn" onclick="addManualStars(1)">➕ +1 ⭐</button>
+                    <button class="star-btn" onclick="addManualStars(5)">➕ +5 ⭐</button>
+                    <button class="star-btn" onclick="resetStars()">🔄 Reset</button>
                 </div>
 
                 <div class="games-grid">
