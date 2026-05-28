@@ -42,27 +42,6 @@
         .stars-display {
             font-size: 24px;
             margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stars-display button {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.4);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .stars-display button:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.6);
         }
 
         .today-info {
@@ -269,40 +248,13 @@
             font-size: 14px;
             color: #155724;
         }
-
-        .star-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        .star-btn {
-            padding: 10px 15px;
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .star-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>☕ Stimlog 2.0</h1>
-            <div class="stars-display">
-                ⭐ <span id="stars">0</span>
-                <button onclick="addManualStar()" title="Stern hinzufügen">+</button>
-            </div>
+            <div class="stars-display">⭐ <span id="stars">0</span></div>
             <div class="today-info">
                 <div>Heute: <strong id="today-intake">0</strong>mg / 400mg</div>
             </div>
@@ -326,12 +278,6 @@
                 </div>
 
                 <div id="warning" style="display: none;"></div>
-
-                <div class="star-buttons">
-                    <button class="star-btn" onclick="addManualStars(1)">+1 ⭐</button>
-                    <button class="star-btn" onclick="addManualStars(5)">+5 ⭐</button>
-                    <button class="star-btn" onclick="resetStars()">Sterne zurücksetzen</button>
-                </div>
 
                 <div class="quick-add">
                     <button class="btn btn-primary" onclick="addCaffeine(95)">☕ Kaffee<br>(95mg)</button>
@@ -430,24 +376,6 @@
             
             // Manuelle Sterne hinzufügen
             return starsAwarded + (data.manual_stars || 0);
-        }
-
-        function addManualStars(amount) {
-            const data = loadData();
-            data.manual_stars = (data.manual_stars || 0) + amount;
-            saveData(data);
-        }
-
-        function addManualStar() {
-            addManualStars(1);
-        }
-
-        function resetStars() {
-            if (confirm('Manuelle Sterne zurücksetzen?')) {
-                const data = loadData();
-                data.manual_stars = 0;
-                saveData(data);
-            }
         }
 
         function updateUI() {
