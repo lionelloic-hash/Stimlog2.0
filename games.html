@@ -180,6 +180,31 @@
         .game-view.active {
             display: block;
         }
+
+        .star-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .star-btn {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .star-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -196,6 +221,12 @@
             </div>
 
             <div id="games-list" class="game-view active">
+                <div class="star-buttons">
+                    <button class="star-btn" onclick="addManualStars(1)">+1 ⭐</button>
+                    <button class="star-btn" onclick="addManualStars(5)">+5 ⭐</button>
+                    <button class="star-btn" onclick="resetStars()">Sterne zurücksetzen</button>
+                </div>
+
                 <div class="games-grid">
                     <div class="game-card" onclick="startGame('flappybird')">
                         <div class="game-icon">🐦</div>
@@ -235,9 +266,26 @@
         let gamePaused = false;
         let score = 0;
 
+        function loadData() {
+            const today = new Date().toDateString();
+            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": [], "manual_stars": 0}');
+            
+            if (data.date !== today) {
+                data.date = today;
+                data.entries = [];
+                data.manual_stars = 0;
+            }
+            
+            return data;
+        }
+
+        function saveData(data) {
+            localStorage.setItem('stimlog_data', JSON.stringify(data));
+        }
+
         function loadStars() {
             const today = new Date().toDateString();
-            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": []}');
+            const data = loadData();
             
             if (data.date !== today) {
                 return 0;
@@ -246,19 +294,41 @@
             const total = data.entries.reduce((sum, entry) => sum + entry.amount, 0);
             const DAILY_LIMIT = 400;
             
-            if (total > DAILY_LIMIT) {
-                return Math.max(0, Math.floor((DAILY_LIMIT / total) * 5));
+            let starsAwarded = 1;
+            if (total >= DAILY_LIMIT) {
+                starsAwarded = 1;
+            } else {
+                starsAwarded = 5 - Math.floor((total / DAILY_LIMIT) * 4);
+                starsAwarded = Math.max(1, starsAwarded);
             }
-            return Math.floor((total / DAILY_LIMIT) * 5);
+            
+            // Manuelle Sterne hinzufügen
+            return starsAwarded + (data.manual_stars || 0);
         }
 
         function deductStars(amount) {
-            const data = JSON.parse(localStorage.getItem('stimlog_data') || '{"date": "", "entries": []}');
+            const data = loadData();
             localStorage.setItem('stimlog_data', JSON.stringify(data));
         }
 
         function updateStarsDisplay() {
             document.getElementById('stars').textContent = loadStars();
+        }
+
+        function addManualStars(amount) {
+            const data = loadData();
+            data.manual_stars = (data.manual_stars || 0) + amount;
+            saveData(data);
+            updateStarsDisplay();
+        }
+
+        function resetStars() {
+            if (confirm('Manuelle Sterne zurücksetzen?')) {
+                const data = loadData();
+                data.manual_stars = 0;
+                saveData(data);
+                updateStarsDisplay();
+            }
         }
 
         function startGame(game) {
