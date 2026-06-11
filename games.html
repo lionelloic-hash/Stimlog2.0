@@ -70,7 +70,6 @@
             flex: 1;
             min-width: 100px;
             box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
-            touch-action: manipulation;
         }
 
         .star-btn:hover {
@@ -98,7 +97,11 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .game-card:active {
+            transform: translateY(-3px);
         }
 
         .game-card:hover {
@@ -138,7 +141,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            touch-action: manipulation;
         }
 
         .nav-buttons button.active {
@@ -206,7 +208,6 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
-            touch-action: manipulation;
         }
 
         .btn-start {
@@ -305,17 +306,17 @@
                 </div>
 
                 <div class="games-grid">
-                    <div class="game-card" onclick="showStartScreen('flappybird')">
+                    <div class="game-card" id="flappybird-card">
                         <div class="game-icon">🐦</div>
                         <div class="game-name">Flappy Bird</div>
                         <div class="game-cost">⭐ 2 Stars</div>
                     </div>
-                    <div class="game-card" onclick="showStartScreen('snake')">
+                    <div class="game-card" id="snake-card">
                         <div class="game-icon">🐍</div>
                         <div class="game-name">Snake</div>
                         <div class="game-cost">⭐ 2 Stars</div>
                     </div>
-                    <div class="game-card" onclick="showStartScreen('memory')">
+                    <div class="game-card" id="memory-card">
                         <div class="game-icon">🧠</div>
                         <div class="game-name">Memory</div>
                         <div class="game-cost">⭐ 1 Star</div>
@@ -515,7 +516,7 @@
             
             let bird = { x: 50, y: canvas.height / 2, width: 20, height: 20, velocity: 0 };
             let pipes = [];
-            let gapSize = 120; // Vergrößert von 80 zu 120
+            let gapSize = 120;
             let pipeWidth = 50;
             let pipeSpeed = 3;
             let pipeGap = 100;
@@ -799,6 +800,11 @@
                 updateStarsDisplay();
             }, 500);
         }
+
+        // Initialize game card click handlers
+        document.getElementById('flappybird-card').addEventListener('click', () => showStartScreen('flappybird'));
+        document.getElementById('snake-card').addEventListener('click', () => showStartScreen('snake'));
+        document.getElementById('memory-card').addEventListener('click', () => showStartScreen('memory'));
 
         updateStarsDisplay();
     </script>
