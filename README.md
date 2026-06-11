@@ -2,6 +2,9 @@
 
 Eine moderne, kompakte Neuversion des Stimlog Koffein-Trackers mit integriertem Minispiel-System.
 
+## 🌐 Live Site
+https://lionelloic-hash.github.io/Stimlog2.0/
+
 ## 🎯 Features
 
 ### Seite 1: Koffein-Tracker
