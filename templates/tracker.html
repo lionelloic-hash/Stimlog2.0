@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>☕ Stimlog 2.0 - Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; text-align: center; border-radius: 10px; margin-bottom: 25px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .progress { width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s; }
+        .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-danger { background: #ff6b6b; color: white; width: 100%; margin-top: 10px; }
+        input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; margin-bottom: 10px; }
+        input:focus { outline: none; border-color: #667eea; }
+        .entry { background: #f8f9fa; padding: 12px; margin: 8px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .entry-amount { color: #667eea; font-weight: 600; }
+        .entry-time { color: #999; font-size: 12px; }
+        h3 { margin: 20px 0 15px; color: #333; }
+        a { color: #667eea; text-decoration: none; display: inline-block; margin: 10px 0; font-weight: 600; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 15px 0; border-radius: 5px; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>☕ Stimlog 2.0</h1>
+            <p style="font-size: 24px; margin: 10px 0;">⭐ {{ stars }}</p>
+            <p>Heute: <strong>{{ total }}</strong>mg / 400mg</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                <span>Tagesfortschritt</span>
+                <span>{{ percentage }}%</span>
+            </div>
+            <div class="progress"><div class="progress-fill" style="width: {{ percentage }}%"></div></div>
+        </div>
+        
+        {% if percentage > 100 %}
+        <div class="warning">⚠️ Limit überschritten! +{{ total - 400 }}mg über dem Limit!</div>
+        {% elif percentage > 80 %}
+        <div class="warning">⚠️ Vorsicht! Noch {{ 400 - total }}mg verfügbar.</div>
+        {% endif %}
+        
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="add(95)">☕ Kaffee (95mg)</button>
+            <button class="btn btn-primary" onclick="add(47)">🍵 Tee (47mg)</button>
+            <button class="btn btn-primary" onclick="add(34)">🥤 Cola (34mg)</button>
+            <button class="btn btn-primary" onclick="add(80)">⚡ Energy (80mg)</button>
+        </div>
+        
+        <input id="custom" type="number" placeholder="mg eingeben..." min="0">
+        <button class="btn btn-primary" onclick="addCustom()" style="width: 100%;">+ Hinzufügen</button>
+        
+        <h3>📋 Heute's Einträge</h3>
+        {% if entries %}
+            {% for entry in entries %}
+            <div class="entry">
+                <div>
+                    <div class="entry-amount">{{ entry.amount }}mg</div>
+                    <div class="entry-time">{{ entry.time }}</div>
+                </div>
+                <button class="btn" onclick="remove({{ loop.index0 }})" style="background: #ff6b6b; color: white; padding: 6px 10px; font-size: 12px;">✕</button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div style="text-align: center; color: #999; padding: 20px;">Noch keine Einträge heute</div>
+        {% endif %}
+        
+        <button class="btn btn-danger" onclick="reset()">Tag zurücksetzen</button>
+        <a href="/games">🎮 Zu den Spielen →</a>
+    </div>
+    
+    <script>
+        function add(amount) {
+            fetch('/api/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({amount})
+            }).then(() => location.reload());
+        }
+        function addCustom() {
+            const val = parseInt(document.getElementById('custom').value);
+            if (val > 0) add(val);
+        }
+        function remove(idx) {
+            fetch('/api/remove', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({index: idx})
+            }).then(() => location.reload());
+        }
+        function reset() {
+            if (confirm('Tag wirklich zurücksetzen?'))
+                fetch('/api/reset', {method: 'POST'}).then(() => location.reload());
+        }
+    </script>
+</body>
+</html>
