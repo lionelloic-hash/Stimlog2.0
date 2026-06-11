@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>🎮 Stimlog 2.0 - Spiele</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; text-align: center; border-radius: 10px; margin-bottom: 25px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .star-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .star-btn { flex: 1; padding: 12px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #333; border: 2px solid #ffb700; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .star-btn:hover { transform: translateY(-2px); }
+        .games { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .game-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; cursor: pointer; }
+        .game-card:hover { transform: translateY(-5px); }
+        .game-icon { font-size: 40px; margin-bottom: 10px; }
+        a { color: #667eea; text-decoration: none; display: inline-block; margin-top: 20px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Spiele</h1>
+            <p style="font-size: 24px; margin-top: 10px;">⭐ {{ stars }}</p>
+        </div>
+        <div class="star-buttons">
+            <button class="star-btn" onclick="addStars(1)">➕ +1 ⭐</button>
+            <button class="star-btn" onclick="addStars(5)">➕ +5 ⭐</button>
+        </div>
+        <div class="games">
+            <div class="game-card">
+                <div class="game-icon">🐦</div>
+                <div>Flappy Bird</div>
+                <div style="font-size: 12px;">⭐ 2 Stars | PB: {{ pbs.get('flappybird', 0) }}</div>
+            </div>
+            <div class="game-card">
+                <div class="game-icon">🐍</div>
+                <div>Snake</div>
+                <div style="font-size: 12px;">⭐ 2 Stars | PB: {{ pbs.get('snake', 0) }}</div>
+            </div>
+            <div class="game-card">
+                <div class="game-icon">🧠</div>
+                <div>Memory</div>
+                <div style="font-size: 12px;">⭐ 1 Star | PB: {{ pbs.get('memory', 0) }}</div>
+            </div>
+        </div>
+        <p style="font-size: 14px; color: #666; margin-top: 20px;">💡 Spiele starten mit: <code>python games.py</code></p>
+        <a href="/">☕ Zum Tracker →</a>
+    </div>
+    <script>
+        function addStars(amount) {
+            fetch('/api/add_stars', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({amount})}).then(() => location.reload());
+        }
+    </script>
+</body>
+</html>
