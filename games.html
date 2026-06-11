@@ -70,6 +70,7 @@
             flex: 1;
             min-width: 100px;
             box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+            touch-action: manipulation;
         }
 
         .star-btn:hover {
@@ -97,6 +98,7 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            touch-action: manipulation;
         }
 
         .game-card:hover {
@@ -136,6 +138,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            touch-action: manipulation;
         }
 
         .nav-buttons button.active {
@@ -154,6 +157,7 @@
             display: block;
             margin: 20px auto;
             border-radius: 10px;
+            touch-action: none;
         }
 
         .game-info {
@@ -202,6 +206,7 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+            touch-action: manipulation;
         }
 
         .btn-start {
@@ -267,6 +272,15 @@
             margin-bottom: 20px;
             color: #333;
             font-size: 24px;
+        }
+
+        .controls-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -334,6 +348,7 @@
                     </div>
                 </div>
                 <canvas id="gameCanvas" width="400" height="300"></canvas>
+                <div id="controls-hint" class="controls-hint"></div>
                 <div class="game-buttons">
                     <button class="btn btn-primary" onclick="pauseResumeGame()">⏸️ Pause</button>
                     <button class="btn btn-secondary" onclick="backToGames()">🛑 Beenden</button>
@@ -506,6 +521,8 @@
             let pipeGap = 100;
             let distance = 0;
 
+            document.getElementById('controls-hint').textContent = '💡 Tap/Click to flap!';
+
             function drawBird() {
                 ctx.fillStyle = '#FFD700';
                 ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
@@ -565,10 +582,18 @@
                 else endGame();
             }
 
+            function flap() {
+                bird.velocity = -6;
+            }
+
             document.addEventListener('keydown', (e) => {
-                if (e.key === ' ') bird.velocity = -6;
+                if (e.key === ' ') flap();
             });
-            canvas.addEventListener('click', () => bird.velocity = -6);
+            canvas.addEventListener('click', flap);
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                flap();
+            });
 
             loop();
         }
@@ -580,9 +605,13 @@
             const gridSize = 20;
             
             let snake = [{x: canvas.width / 2, y: canvas.height / 2}];
-            let food = {x: Math.random() * canvas.width, y: Math.random() * canvas.height};
+            let food = {x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize, y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize};
             let direction = {x: 1, y: 0};
             let nextDirection = {x: 1, y: 0};
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            document.getElementById('controls-hint').textContent = '💡 Use arrows or swipe to move!';
 
             function draw() {
                 ctx.fillStyle = '#000';
@@ -611,7 +640,7 @@
 
                 snake.unshift(head);
 
-                if (head.x === Math.floor(food.x / gridSize) * gridSize && head.y === Math.floor(food.y / gridSize) * gridSize) {
+                if (head.x === food.x && head.y === food.y) {
                     score++;
                     food = {x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize, y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize};
                 } else {
@@ -627,12 +656,37 @@
                 else endGame();
             }
 
-            document.addEventListener('keydown', (e) => {
+            function handleKeyDown(e) {
                 if (e.key === 'ArrowUp' && direction.y === 0) nextDirection = {x: 0, y: -1};
                 if (e.key === 'ArrowDown' && direction.y === 0) nextDirection = {x: 0, y: 1};
                 if (e.key === 'ArrowLeft' && direction.x === 0) nextDirection = {x: -1, y: 0};
                 if (e.key === 'ArrowRight' && direction.x === 0) nextDirection = {x: 1, y: 0};
-            });
+            }
+
+            function handleTouchStart(e) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+
+            function handleTouchEnd(e) {
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = touchEndX - touchStartX;
+                const diffY = touchEndY - touchStartY;
+                const minSwipeDistance = 30;
+
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > minSwipeDistance && direction.x === 0) nextDirection = {x: 1, y: 0};
+                    else if (diffX < -minSwipeDistance && direction.x === 0) nextDirection = {x: -1, y: 0};
+                } else {
+                    if (diffY > minSwipeDistance && direction.y === 0) nextDirection = {x: 0, y: 1};
+                    else if (diffY < -minSwipeDistance && direction.y === 0) nextDirection = {x: 0, y: -1};
+                }
+            }
+
+            document.addEventListener('keydown', handleKeyDown);
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchend', handleTouchEnd);
 
             loop();
         }
@@ -647,6 +701,8 @@
             const padding = 10;
             let flipped = [];
             let matched = 0;
+
+            document.getElementById('controls-hint').textContent = '💡 Tap cards to flip!';
 
             for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 3; j++) {
@@ -674,13 +730,9 @@
                 });
             }
 
-            canvas.addEventListener('click', (e) => {
+            function handleClick(x, y) {
                 if (!gameRunning || gamePaused || flipped.length === 2) return;
                 
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
                 for (let idx = 0; idx < cards.length; idx++) {
                     const card = cards[idx];
                     if (x > card.x && x < card.x + cardSize && y > card.y && y < card.y + cardSize) {
@@ -706,6 +758,21 @@
                         break;
                     }
                 }
+            }
+
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                handleClick(x, y);
+            });
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const y = e.touches[0].clientY - rect.top;
+                handleClick(x, y);
             });
 
             function loop() {
